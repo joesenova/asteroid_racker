@@ -21,7 +21,7 @@ API_URL = 'https://api.nasa.gov/neo/rest/v1/feed'
 API_URL_TEST = f'{API_URL}?start_date=%s&end_date=%s&api_key=DEMO_KEY'
 
 
-def main():
+def main() -> None:
     """
     Main function which parses input and calculates statistics.
     """
@@ -39,9 +39,11 @@ def main():
     print_statistics(stats)
 
 
-def calculate_statistics(start_date, end_date):
-    """
-    Make an API request and calculate statistics.
+def calculate_statistics(start_date: str, end_date: str) -> dict:
+    """Make an API request and calculate statistics
+    :params start_date: Date to search from
+    :params end_date:D Date to search to
+    :returns: dict
     """
 
     params = {
@@ -57,8 +59,8 @@ def calculate_statistics(start_date, end_date):
 
     num_asteroids = api_resp.element_count
     num_potentially_hazardous_asteroids = 0
-    largest_diameter_meters = -1
-    nearest_miss_kms = None
+    largest_diameter_meters: float = 0.0
+    nearest_miss_kms: float = 0.0
 
     for key, near_objects in api_resp.near_earth_objects.items():
         for near_object in near_objects:
@@ -86,7 +88,7 @@ def calculate_statistics(start_date, end_date):
     }
 
 
-def print_statistics(stats):
+def print_statistics(stats: dict) -> None:
     """
     Print the calculated statistics.
     """
