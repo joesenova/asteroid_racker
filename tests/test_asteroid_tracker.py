@@ -10,7 +10,6 @@ import responses
 from asteroid_tracker import API_URL_TEST, calculate_statistics, resp_models
 from tests import fixtures
 
-
 @responses.activate
 def test_2021_01_01_to_2021_01_02_success_200():
     """
@@ -47,15 +46,16 @@ def test_2021_01_01_to_2021_01_02_success_200():
     # Calculate statistics
 
     stats = calculate_statistics(start_date, end_date)
+    assert isinstance(stats, resp_models.Stats)
 
-    assert stats['start_date'] == start_date
-    assert stats['end_date'] == end_date
+    assert stats.start_date == start_date
+    assert stats.end_date == end_date
 
-    assert stats['num_asteroids'] == num_asteroids
-    assert stats['num_potentially_hazardous_asteroids'] == num_potentially_hazardous_asteroids
+    assert stats.num_asteroids == num_asteroids
+    assert stats.num_potentially_hazardous_asteroids == num_potentially_hazardous_asteroids
 
-    assert math.isclose(stats['largest_diameter_meters'], largest_diameter_meters, abs_tol=0.00001)
-    assert math.isclose(stats['nearest_miss_kms'], nearest_miss_kms, abs_tol=0.00001)
+    assert math.isclose(stats.largest_diameter_meters, largest_diameter_meters, abs_tol=0.00001)
+    assert math.isclose(stats.nearest_miss_kms, nearest_miss_kms, abs_tol=0.00001)
 
 
 @responses.activate
@@ -85,7 +85,7 @@ def test_invalid_date_fail_400():
 
     stats = calculate_statistics(start_date, end_date)
 
-    assert 'error' in stats
-    assert stats['error']['code'] == 400
-    assert stats['error']['http_error'] == 'BAD_REQUEST'
-    assert stats['error']['error_message'] == 'Date Format Exception - Expected format (yyyy-mm-dd) - The Feed date limit is only 7 Days'
+    assert isinstance(stats, resp_models.Error)
+    assert stats.error.code == 400
+    assert stats.error.http_error == 'BAD_REQUEST'
+    assert stats.error.error_message == 'Date Format Exception - Expected format (yyyy-mm-dd) - The Feed date limit is only 7 Days'

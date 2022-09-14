@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+import dataclasses
 import typing as t
 import pydantic
 
@@ -61,4 +63,53 @@ class Feed(pydantic.BaseModel):
     element_count: int
     near_earth_objects: t.Dict[str, t.List[NearEarthObject]]
 
+    # Calculated Values
+    num_asteroids: t.Optional[int]
+    num_potentially_hazardous_asteroids: t.Optional[int]
+    largest_diameter_meters: t.Optional[float]
+    nearest_miss_kms: t.Optional[float]
 
+    def calc_feed_stats(self) -> None:
+        self.num_asteroids = self.element_count
+        self.num_potentially_hazardous_asteroids: int = 0
+        self.largest_diameter_meters: float = 0.0
+        self.nearest_miss_kms: float = 0.0
+
+        for near_objects in self.near_earth_objects.values():
+            for near_object in near_objects:
+                if near_object.is_potentially_hazardous_asteroid:
+                    self.num_potentially_hazardous_asteroids += 1
+
+                estimated_diameter_max = near_object.estimated_diameter.meters.estimated_diameter_max
+                if self.largest_diameter_meters < estimated_diameter_max:
+                    self.largest_diameter_meters = estimated_diameter_max
+
+                miss_distance = float(near_object.close_approach_data[0].miss_distance.kilometers)
+                if not self.nearest_miss_kms:
+                    self.nearest_miss_kms = miss_distance
+                else:
+                    if self.nearest_miss_kms > miss_distance:
+                        self.nearest_miss_kms = miss_distance
+
+
+@dataclasses.dataclass
+class Stats:
+    start_date: str
+    end_date: str
+    num_asteroids: int
+    num_potentially_hazardous_asteroids: int
+    largest_diameter_meters: float
+    nearest_miss_kms: float
+
+
+@dataclasses.dataclass
+class Details:
+    code: int
+    http_error: str
+    error_message: str
+    request: str
+
+
+@dataclasses.dataclass
+class Error:
+    error: Details
